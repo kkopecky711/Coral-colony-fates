@@ -1,0 +1,39 @@
+
+
+2017 --> 2018
+
+
+Pocillopora live            (L -> L)         : 380 (72490.06 cm^2) -> 380 (109101.99 cm^2) ; growth: 337 (102976.20 cm^2) , shrink: 43 (6125.80 cm^2)
+Pocillopora partially dead  (L -> PD)        : 104 (live 33512.23 cm^2) ; dead 8844.74 cm^2) ; % dead 21.53
+Pocillopora totally dead    (L -> D)         : 20 (1643.00 cm^2)
+Pocillopora born            (∅ -> L)         : 75 (6292.38 cm^2)
+NO MATCH (live or dead)     (D,L → ∅)        : 35 (1752.25 cm^2)
+DEAD REMAINING DEAD         (D -> D, D -> ∅) : 68 (4228.67 cm^2)
+TO CHECK                    (∅ → D, D -> L)  : 74 (13337.12 cm^2)
+Total area                                    : 178712.39 cm^2
+
+
+2018 --> 2019
+
+
+Pocillopora live            (L -> L)         : 280 (0.00 cm^2) -> 280 (52961.23 cm^2) ; growth: 245 (49256.18 cm^2) , shrink: 35 (3705.05 cm^2)
+Pocillopora partially dead  (L -> PD)        : 104 (live 21354.50 cm^2) ; dead 20201.42 cm^2) ; % dead 40.23
+Pocillopora totally dead    (L -> D)         : 191 (72014.00 cm^2)
+Pocillopora born            (∅ -> L)         : 13 (990.63 cm^2)
+NO MATCH (live or dead)     (D,L → ∅)        : 28 (2081.88 cm^2)
+DEAD REMAINING DEAD         (D -> D, D -> ∅) : 150 (35793.81 cm^2)
+TO CHECK                    (∅ → D, D -> L)  : 57 (12460.28 cm^2)
+Total area                                    : 217857.74 cm^2
+
+
+2019 --> 2020
+
+
+Pocillopora live            (L -> L)         : 185 (0.00 cm^2) -> 185 (40019.15 cm^2) ; growth: 106 (29290.02 cm^2) , shrink: 79 (10729.13 cm^2)
+Pocillopora partially dead  (L -> PD)        : 132 (live 25330.45 cm^2) ; dead 125529.71 cm^2) ; % dead 50.64
+Pocillopora totally dead    (L -> D)         : 39 (77071.89 cm^2)
+Pocillopora born            (∅ -> L)         : 35 (1413.89 cm^2)
+NO MATCH (live or dead)     (D,L → ∅)        : 49 (3468.67 cm^2)
+DEAD REMAINING DEAD         (D -> D, D -> ∅) : 316 (352030.60 cm^2)
+TO CHECK                    (∅ → D, D -> L)  : 81 (9624.62 cm^2)
+Total area                                    : 634488.99 cm^2

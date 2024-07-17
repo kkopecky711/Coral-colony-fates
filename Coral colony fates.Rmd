@@ -19,6 +19,7 @@ library(glmmTMB)
 library(ggeffects)
 library(ggsankey)
 library(ggalluvial)
+library(car)
 
 ```
 
@@ -151,13 +152,16 @@ colony_survival <- colony_fates %>%
                                    action == "Growth" ~ 1,
                                    action == "Partial mortality" ~ prop_survival),
         prop_survival =  if_else(prop_survival > 1, 1, prop_survival)) %>% 
-  mutate(survival = if_else(prop_survival > 0.5, 1, 0),
+  mutate(survival = if_else(prop_survival > 0, 1, 0),
          mortality = if_else(survival == 1, 0, 1))
+  # mutate(survival = if_else(prop_survival > 0.5, 1, 0),
+  #        mortality = if_else(survival == 1, 0, 1))
 
 survival.log_reg <- glmmTMB(mortality ~ area_2018 + class + (1|plot),
                         family = "binomial",
                         data = colony_survival)
 summary(survival.log_reg)
+Anova(survival.log_reg)
 
 predictions.mortality <- ggpredict(survival.log_reg, terms = ~area_2018 + class)
 plot(predictions.mortality)
@@ -270,7 +274,76 @@ ggplot(colony_sizes, aes(x = colony_size, fill = year)) +
 ```
 
 
-### Extended time series for Plot 18
+## Extended time series for Plot 18
+#### Total raw and proportional coverage through time for each class
+```{r Data wrangling}
+
+# Read in unmatched colony areas for Plot 18 only
+plot18.whole_plots <- read_csv("Data/Plot 18/Plot18_2017-2020_unmatched.csv") %>% 
+  clean_names() %>% 
+  select(year, tag_lab_id, tag_lab_class_name, tag_lab_surf_area) %>% 
+  filter(tag_lab_class_name != "NA")
+
+# Calculate total areas of all classes combined for each year (to be used to calculate proportions)
+plot18.summary.year <- plot18.whole_plots %>% 
+  group_by(year) %>% 
+  summarize(total_surf = sum(tag_lab_surf_area)) %>% 
+  mutate(total_surf_m2 = total_surf*0.0001) %>% 
+  select(-total_surf)
+
+# Calculate surface areas for each class in each year
+plot18.summary.classes <- plot18.whole_plots %>% 
+  group_by(year,tag_lab_class_name) %>% 
+  summarize(total_surf = sum(tag_lab_surf_area),
+            surf_m2 = total_surf*0.0001) %>% 
+  select(-total_surf)
+
+# Create combined dataframe and calculate propotional cover by each class
+plot18.summary <- merge(plot18.summary.classes, plot18.summary.year)
+plot18.summary <- plot18.summary %>% 
+  mutate(prop_surf = surf_m2/total_surf_m2)
+  
+```
+
+```{r Visualizations}
+
+# Raw values
+ggplot(plot18.summary, aes(x = year, y = surf_m2, fill = tag_lab_class_name)) +
+  geom_col(color = "black") +
+  labs(x = "Year",
+       y = Surface~area~(m^2)) +
+  scale_fill_manual(values = c("#604A76","#D7C8C6", "#4A5352"),
+                    name = "",
+                    labels = c("Acropora", "Pocillopora", "Dead coral")) +
+  scale_x_continuous(breaks = c(2017,2018,2019,2020)) +
+  scale_y_continuous(expand = c(0,0)) +
+  theme_classic(base_size = 12)
+
+# Proportional values
+ggplot(plot18.summary, aes(x = year, y = prop_surf, fill = tag_lab_class_name)) +
+  geom_col(color = "black") +
+  labs(x = "Year",
+       y = "Proportional surface area") +
+  scale_fill_manual(values = c("#604A76","#D7C8C6", "#4A5352"),
+                    name = "",
+                    labels = c(expression(italic("Acropora")), 
+                                expression(italic("Pocillopora")),
+                               "Dead coral")) +
+  scale_x_continuous(breaks = c(2017,2018,2019,2020)) +
+  scale_y_continuous(expand = c(0,0),
+                     limits = c(0,1.02)) +
+  theme_classic(base_size = 12)
+
+```
+
+
+
+
+
+
+
+Old data
+
 ```{r}
 
 # 2017-2018 period
@@ -328,7 +401,7 @@ plot_18.master <- rbind(plot18.2017_2018.fates, plot18.2018_2019.fates, plot18.2
 
 ```
 
-```{r}
+```{r Archive}
 # Stacked area chart for Plot 18 extended time series
 plot18.2017_2018.areas <- plot18.2017_2018.fates %>% 
   pivot_longer(cols = starts_with("are"),
@@ -377,6 +450,34 @@ plot18.colony_areas.summary <- plot18.colony_areas.summary %>%
 
 ggplot(plot18.colony_areas.summary, aes(x = year, y = prop_cover, fill = class)) +
   geom_area() +
+  labs(x = "Year",
+       y = "Proportional surface area") +
+  scale_fill_manual(values = c("#604A76","#D7C8C6", "#4A5352"),
+                    name = "",
+                    labels = c(expression(italic("Acropora")), 
+                                expression(italic("Pocillopora")),
+                               "Dead coral")) +
+  scale_x_continuous(expand = c(0,0),
+                     breaks = c(2017,2018,2019,2020)) +
+  scale_y_continuous(expand = c(0,0)) +
+  theme_classic()
+
+# columns
+ggplot(plot18.colony_areas.summary, aes(x = year, y = colony_area, fill = class)) +
+  geom_col() +
+  labs(x = "Year",
+       y = Surface~area~(m^2)) +
+  scale_fill_manual(values = c("#604A76","#D7C8C6", "#4A5352"),
+                    name = "",
+                    labels = c("Acropora", "Pocillopora", "Dead coral")) +
+  scale_x_continuous(expand = c(0,0),
+                     breaks = c(2017,2018,2019,2020)) +
+  scale_y_continuous(expand = c(0,0)) +
+  theme_classic()
+
+# Proportional columns
+ggplot(plot18.colony_areas.summary, aes(x = year, y = prop_cover, fill = class)) +
+  geom_col() +
   labs(x = "Year",
        y = "Proportional surface area") +
   scale_fill_manual(values = c("#604A76","#D7C8C6", "#4A5352"),
