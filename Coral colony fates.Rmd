@@ -31,18 +31,17 @@ library(kableExtra)
 ```
 
 ### All plots
-```{r}
-colony_matches <- read_csv("Data/Matches_master.csv") %>% 
-  clean_names() 
-
-```
 
 #### Colony numbers and absolute surface areas
 ```{r}
+# Master datafile for all plots 2018-2019
+colony_matches <- read_csv("Data/Matches_master.csv") %>% 
+  clean_names() 
 
 # Numbers of colonies that fall into different fate categories from 2018-2019
 colony_fates <- colony_matches %>%
   filter(class == "Pocillopora" | class == "Acropora",
+         #split_fuse == "none",
          action != "born") %>% 
    rename(id_2018 = blob1,
          id_2019 = blob2,
@@ -57,6 +56,10 @@ colony_fates <- colony_matches %>%
   group_by(plot, id_2018, class, action) %>% 
   summarize(area_2018 = mean(area_2018),
          area_2019 = sum(area_2019)) 
+```
+
+Total live colonies and surface areas for Poc and Acro across all five plots
+```{r}
 
 # Total live colonies in 2018 (pre-disturbance)
 pre_dist.col_num <- colony_fates %>%
@@ -73,9 +76,10 @@ ggplot(pre_dist.col_num, aes(x = fct_rev(class), y = num_colonies, fill = class)
   scale_fill_manual(name = "",
                     labels = c("", ""),
                     values = c("#604A76", "#D7C8C6")) +
-  labs(x = "Coral taxa",
+  labs(x = "",
        y = "Number of colonies") +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1, face = "italic"))
   
 # Total live surface areas in 2018 (pre-disturbance)
 pre_dist.surf_area <- colony_fates %>% 
@@ -92,9 +96,10 @@ ggplot(pre_dist.surf_area, aes(x = fct_rev(class), y = total_surf, fill = class)
   scale_fill_manual(name = "",
                     labels = c("", ""),
                     values = c("#604A76", "#D7C8C6")) +
-  labs(x = "Coral taxa",
+  labs(x = "",
        y = Surface~area~(m^2)) +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1, face = "italic"))
   
 ```
 
@@ -117,7 +122,8 @@ ggplot(colony_numbers.poc, aes(x = action, y = num_colonies)) +
                      breaks = c(200,400,600,800,1000,1200)) +
   labs(x = "Type of change",
        y = "Number of colonies") +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
 
 # Acropora
 colony_numbers.acro <- colony_fates %>% 
@@ -137,7 +143,8 @@ ggplot(colony_numbers.acro, aes(x = action, y = num_colonies)) +
                      breaks = c(25,50,75,100,125,150,175)) +
   labs(x = "Type of change",
        y = "Number of colonies") +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
 
 "#84A6A2","#4A5352","#151E2F","#D7C8C6","#BE5A47","#604A76"
 
@@ -162,7 +169,8 @@ ggplot(gains_losses.poc, aes(x = action, y = SA_change)) +
   scale_y_continuous(limits = c(-35,10)) +
   labs(x = "Type of change",
        y = Surface~area~change~(m^2)) +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
 
 
 # Gains and losses in surface areas, Acropora
@@ -183,43 +191,46 @@ ggplot(gains_losses.acro, aes(x = action, y = SA_change)) +
   labs(x = "Type of change",
        y = Surface~area~change~(m^2)) +
   scale_y_continuous(limits = c(-4,1)) +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1))
   
 ```
 
 
-#### Size analyses
+#### Probability of mortality ~ colony size before heatwave
 ```{r}
-## Logistic regression of mortality ~ pre-bleaching size
+
 # Bin colonies as having died completely (> 50% mortality) or survived (<50% mortality)
 # Colony survival 
 colony_survival <- colony_fates %>% 
   filter(class == "Pocillopora" | class == "Acropora",
-         action == "Complete mortality" |  action == "Partial mortality" | action == "Growth"| action == "No change",
+         action != "born",
+         #action == "Complete mortality" |  action == "Partial mortality" | action == "Growth"| action == "No change",
         # id_2018 != 441, Outlier Acropora colonies
         # id_2018 != 812,
-         area_2018 > 20,) %>% 
+         area_2018 > 20) %>% 
   mutate(prop_survival = area_2019/area_2018,
          prop_survival = case_when(action == "Complete mortality" ~ 0,
                                    action == "Growth" ~ 1,
-                                   action == "Partial mortality" ~ prop_survival),
+                                   action == "Partial mortality" ~ prop_survival,
+                                   action == "No change" ~ prop_survival),
         prop_survival =  if_else(prop_survival > 1, 1, prop_survival)) %>% 
-  mutate(survival = if_else(prop_survival > 0, 1, 0),
-         mortality = if_else(survival == 1, 0, 1))
-  # mutate(survival = if_else(prop_survival > 0.5, 1, 0),
+  # mutate(survival = if_else(prop_survival > 0, 1, 0),
   #        mortality = if_else(survival == 1, 0, 1))
+  mutate(survival = if_else(prop_survival >= 0.5, 1, 0),
+         mortality = if_else(prop_survival < 0.5, 1, 0))
 
-
+# GLMM of mortality ~ initial size and taxa
 mortality.log_reg <- glmmTMB(mortality ~ area_2018*class + (1|plot),
                         family = "binomial",
                         data = colony_survival)
 
 # View model outputs
 summary(mortality.log_reg)
--0.002249 + 0.003947 # Slope for Pocillopora
-
+# -0.002249 + 0.003947 # Slope for Pocillopora
+# 
 emtrends(mortality.log_reg, "class", var = "area_2018")
-
+# 
 confint(mortality.log_reg)
 
 
@@ -247,7 +258,7 @@ ggplot(predictions.mortality, aes(x = x, y = predicted, color = group)) +
              aes(x = area_2018, y = mortality, color = class),
              alpha = 0.5,
              height = 0.01) +
-  labs(x = Colony~size~pre-bleaching~(cm^2),
+  labs(x = Colony~size~before~heat~wave~(cm^2),
        y = "Colony mortality") +
   scale_fill_manual(values = c("#604A76", "#D7C8C6"),
                     labels = c(expression(italic("Acropora")), 
@@ -441,6 +452,97 @@ ggplot(colony_sizes, aes(x = colony_size, fill = year)) +
 
 ## Extended time series for Plot 18
 #### Total raw and proportional coverage through time for each class
+
+```{r}
+area.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+  clean_names() %>% 
+  rename(size = area1) %>%
+  group_by(class) %>% 
+  summarize(area = sum(size)*0.0001) %>% 
+  mutate(year = 2017) 
+
+area.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+  clean_names() %>% 
+  rename(size = area2) %>% 
+  group_by(class) %>% 
+  summarize(area = sum(size)*0.0001) %>% 
+  mutate(year = 2018) 
+
+area.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>%
+  clean_names() %>%
+  rename(size = area2) %>% 
+  group_by(class) %>% 
+  summarize(area = sum(size)*0.0001) %>% 
+  filter(class != "Empty")%>% 
+  mutate(year = 2019) 
+
+area.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>% 
+  clean_names() %>% 
+  rename(size = area2) %>% 
+  group_by(class) %>% 
+  summarize(area = sum(size)*0.0001) %>% 
+  filter(class != "Empty") %>% 
+  mutate(year = 2020) 
+
+area.2020$area[3] <-  9.849215 # To temporarily replace erroneous value for dead coral in 2020
+  
+# Combine years
+live_dead.area <- rbind(area.2017, area.2018, area.2019, area.2020)
+
+# Combine Acropora and Pocillopora into a single category of live coral
+live_dead.area <- live_dead.area %>% 
+  mutate(coral_condition = case_when(class == "Pocillopora_dead" ~ "Dead",
+                                TRUE ~ "Live")) %>% 
+  group_by(year, coral_condition) %>% 
+  summarize(area = sum(area))
+
+# Calculate proportional coverage
+total_area <- live_dead.area %>% 
+  group_by(year) %>% 
+  summarize(total_area = sum(area)) 
+
+live_dead.area <- merge(live_dead.area, total_area)
+
+live_dead.area <- live_dead.area %>% 
+  mutate(prop_area = round(area/total_area, 1),
+         area = round(area, 1))
+  
+```
+
+Visualizations
+```{r}
+# Raw values
+ggplot(live_dead.area, aes(x = year, y = area, fill = fct_rev(coral_condition))) +
+  geom_col(color = "black") +
+  labs(x = "Year",
+       y = Surface~area~(m^2)) +
+  scale_fill_manual(values = c("#9C899E", "#333333"),
+                    name = "",
+                    labels = c(Live~coral~(italic("Acropora + Pocillopora")), "Dead coral")) +
+  scale_x_continuous(breaks = c(2017,2018,2019,2020)) +
+  scale_y_continuous(expand = c(0,0),
+                     limits = c(0, 17)) +
+  theme_classic(base_size = 12) +
+  theme(legend.position = "top") 
+
+# Proportional values
+ggplot(live_dead.area, aes(x = year, y = prop_area, fill = fct_rev(coral_condition))) +
+  geom_col(color = "black") +
+  labs(x = "Year",
+       y = "Proportion of surface area") +
+  scale_fill_manual(values = c("#9C899E", "#333333"),
+                    name = "",
+                    labels = c("Live", "Dead")) +
+  scale_x_continuous(breaks = c(2017,2018,2019,2020)) +
+  scale_y_continuous(expand = c(0,0),
+                     limits = c(0, 1.01)) +
+  theme_classic(base_size = 12) +
+  theme(legend.position = "top")
+```
+
+
+
+Need to check what's going on here; values are too high for a single plot when compared with the amount of coral seen in across all 5 plots in previous analyses 
 ```{r Data wrangling}
 
 # Read in unmatched colony areas for Plot 18 only
@@ -559,21 +661,22 @@ Get size classes in a way that will line up with Sankey diagram
 sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
+         action != "born",
          area1 > 20,
          split_fuse == "none") %>% 
   rename(size = area1) %>% 
   mutate(year = 2017) %>% 
-  select(year, size)
+  select(genet, year, size, action)
 
 sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
-         action == "born",
+         action != "born",
          area2 > 20,
          split_fuse == "none") %>% 
   rename(size = area2) %>% 
   mutate(year = 2018) %>% 
-  select(year, size)
+  select(genet, year, size, action)
 
 sizes.2018.check <- sizes.2018 %>% 
   filter(action == "born")
@@ -581,25 +684,37 @@ sizes.2018.check <- sizes.2018 %>%
 sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
-         #action != "born",
+         action != "born",
          area2 > 20,
          split_fuse == "none") %>% 
   rename(size = area2) %>% 
   mutate(year = 2019) %>% 
-  select(year, size)
+  select(genet, year, size, action)
 
 sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
   clean_names() %>% 
   filter(#period == "2019-2020",
          class == "Pocillopora",
          area2 > 20,
-         #action != "born",
+         action != "born",
          split_fuse == "none") %>% 
   rename(size = area2) %>% 
   mutate(year = 2020) %>% 
-  select(year, size)
+  select(genet, year, size, action)
 
 sizes.all_years <- rbind(sizes.2017, sizes.2018, sizes.2019, sizes.2020)
+sizes.all_years <- sizes.all_years %>% 
+  mutate(action = case_when(action == "shrink" ~ "Shrink",
+                            TRUE ~ "Grow"))
+
+sizes.all_years <- sizes.all_years %>% 
+  mutate(fill_color = if_else(year == 2017, "None", action))
+
+
+# Calculate total area of classes
+total.area.all_years <- sizes.all_years %>% 
+  group_by(year) %>% 
+  summarize(total_area = sum(size)*0.0001)
 
 # sizes.all_years <- sizes.all_years %>% 
 #   filter(size > 20)
@@ -613,6 +728,20 @@ colony_counts.all_years <- sizes.all_years %>%
 Histograms of size distributions in each year
 ```{r}
 
+# For all years
+ggplot(sizes.all_years, aes(x = size)) +
+  geom_histogram(aes(fill = fill_color),
+                 color = "black",
+                 binwidth = 100) +
+  facet_wrap(~year, ncol = 4) +
+  labs(x = Colony~size~(cm^2),
+       y = "No. live colonies") +
+  scale_fill_manual(name = "",
+                    labels = c("Size increase", "", "Size decrease"),
+                    values = c("#D7C8C6", "white", "#ECBD95")) +
+  theme_minimal(base_size = 14)
+
+# For For 2017 as one color
 ggplot(sizes.all_years, aes(x = size)) +
   geom_histogram(color = "black",
                  fill = "#D7C8C6",
@@ -620,12 +749,83 @@ ggplot(sizes.all_years, aes(x = size)) +
   facet_wrap(~year, ncol = 4) +
   labs(x = Colony~size~(cm^2),
        y = "Number of colonies") +
-  theme_minimal()
+  scale_fill_manual(name = "",
+                    labels = c("Size increase", "Size decrease"),
+                    values = c("#D7C8C6", "#ECBD95")) +
+  theme_minimal(base_size = 12)
+
+
+
 
 ```
 
 
-# Allow for additions of new colonies
+#### Mortality
+```{r}
+#dead_sizes.2017 <- tibble(year = 2017, size = 0)
+dead_sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+  clean_names() %>% 
+  select(-area2) %>% 
+  filter(class == "Pocillopora_dead", 
+         area1 > 20,
+         #action == "dead",
+         split_fuse == "none") %>% 
+  rename(size = area1) %>% 
+  mutate(year = 2017) %>% 
+  select(year, size)
+
+
+dead_sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+  clean_names() %>% 
+  filter(class == "Pocillopora",
+         area1 > 20,
+         action == "dead",
+         split_fuse == "none") %>% 
+  rename(size = area1) %>% 
+  mutate(year = 2018) %>% 
+  select(year, size)
+
+dead_sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+  clean_names() %>% 
+  filter(class == "Pocillopora",
+         action == "dead",
+         area1 > 20,
+         split_fuse == "none") %>% 
+  rename(size = area1) %>% 
+  mutate(year = 2019) %>% 
+  select(year, size)
+
+dead_sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+  clean_names() %>% 
+  filter(class == "Pocillopora",
+         action == "dead",
+         area1 > 20,
+         split_fuse == "none") %>% 
+  rename(size = area1) %>% 
+  mutate(year = 2020) %>% 
+  select(year, size)
+
+dead_sizes.all_years <- rbind(dead_sizes.2017, dead_sizes.2018, dead_sizes.2019, dead_sizes.2020)
+
+```
+
+```{r}
+ggplot(dead_sizes.all_years, aes(x = size)) +
+  geom_histogram(color = "black",
+                 fill = "#4A5352",
+                 binwidth = 100) +
+  facet_wrap(~year, ncol = 4) +
+  labs(x = Colony~size~(cm^2),
+       y = "No. dead colonies") +
+  scale_x_continuous(breaks = c(0, 400, 800, 1200)) +
+  scale_y_continuous(limits = c(0,150)) +
+  expand_limits(x = 1200) +
+  theme_minimal(base_size = 14)
+```
+
+
+
+## Allow for additions of new colonies
 ```{r}
 
 sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
@@ -876,6 +1076,10 @@ plot_18.sankey.keiko$T2 <- factor(plot_18.sankey.keiko$T2, levels = c("Live", "P
 plot_18.sankey.keiko$T3 <- factor(plot_18.sankey.keiko$T3, levels = c("Live", "Partially dead", "Completely dead"))
 plot_18.sankey.keiko$T4 <- factor(plot_18.sankey.keiko$T4, levels = c("Live", "Partially dead", "Completely dead"))
 
+# Arrange edges in descending order
+plot_18.sankey.keiko <- plot_18.sankey.keiko %>%
+  arrange(desc(n))
+
 # Sankey diagram
 ggplot(plot_18.sankey.keiko, 
        aes(axis1 = T1, axis2 = T2, axis3 = T3, axis4 = T4, y = n)) +
@@ -892,9 +1096,20 @@ ggplot(plot_18.sankey.keiko,
                    position = "top") +
   labs(x = "Year",
        y = "Number of colonies") +
-  theme_alluvial() +
-  #theme(legend.position = "bottom") +
+  theme_alluvial(base_size = 14) +
+  theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 1))
+
+# Reorder dataframe to match Sankey plot
+row_order <- c(2, 3, 8, 1, 7, 6, 5, 4)
+
+sankey_reordered <- plot_18.sankey.keiko %>% 
+  slice(row_order)
+
+# Reorder dataframe
+sankey_reordered <- plot_18.sankey.keiko[row_order, ]
+
+
 
 "#D7C8C6", "#4A5352"
 
@@ -903,6 +1118,30 @@ cal_palette(name = "bigsur")
 
 
 ```
+
+Table for colony fates to accompany Sankey plot
+```{r}
+
+sankey_reordered <- sankey_reordered %>% 
+  rename('2017' = "T1",
+         '2018' = "T2",
+         '2019' = "T3",
+         '2020' = "T4")
+
+# Using kable
+library(knitr)
+library(kableExtra)
+
+# Create a publication-ready table
+sankey_reordered %>%
+  kable(caption = "") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = TRUE) %>%
+  column_spec(1:4, width = "3.5cm") %>%
+  add_header_above(c(" " = 1, "Colony conditions across years" = 3, " " = 1))
+
+```
+
 
 Sankey for Acropora
 ```{r}
