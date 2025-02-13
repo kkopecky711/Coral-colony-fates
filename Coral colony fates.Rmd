@@ -454,44 +454,46 @@ ggplot(colony_sizes, aes(x = colony_size, fill = year)) +
 #### Total raw and proportional coverage through time for each class
 
 ```{r}
-area.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+area.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Raw areas/2017.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
   clean_names() %>% 
-  rename(size = area1) %>%
-  group_by(class) %>% 
+  rename(size = tag_lab_surf_area) %>%
+  group_by(tag_lab_class_name) %>% 
   summarize(area = sum(size)*0.0001) %>% 
   mutate(year = 2017) 
 
-area.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+area.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Raw areas/2018.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
   clean_names() %>% 
-  rename(size = area2) %>% 
-  group_by(class) %>% 
+  rename(size = tag_lab_surf_area) %>%
+  group_by(tag_lab_class_name) %>% 
   summarize(area = sum(size)*0.0001) %>% 
-  mutate(year = 2018) 
+  mutate(year = 2018)
 
-area.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>%
-  clean_names() %>%
-  rename(size = area2) %>% 
-  group_by(class) %>% 
-  summarize(area = sum(size)*0.0001) %>% 
-  filter(class != "Empty")%>% 
-  mutate(year = 2019) 
-
-area.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>% 
+area.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Raw areas/2019.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
   clean_names() %>% 
-  rename(size = area2) %>% 
-  group_by(class) %>% 
+  rename(size = tag_lab_surf_area) %>%
+  group_by(tag_lab_class_name) %>% 
   summarize(area = sum(size)*0.0001) %>% 
-  filter(class != "Empty") %>% 
+  mutate(year = 2019)
+
+area.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Raw areas/2020.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+  clean_names() %>% 
+  rename(size = tag_lab_surf_area) %>%
+  group_by(tag_lab_class_name) %>% 
+  summarize(area = sum(size)*0.0001) %>% 
   mutate(year = 2020) 
 
-area.2020$area[3] <-  9.849215 # To temporarily replace erroneous value for dead coral in 2020
+#area.2020$area[3] <-  9.849215 # To temporarily replace erroneous value for dead coral in 2020
   
 # Combine years
 live_dead.area <- rbind(area.2017, area.2018, area.2019, area.2020)
 
 # Combine Acropora and Pocillopora into a single category of live coral
 live_dead.area <- live_dead.area %>% 
-  mutate(coral_condition = case_when(class == "Pocillopora_dead" ~ "Dead",
+  mutate(coral_condition = case_when(tag_lab_class_name == "Pocillopora_dead" ~ "Dead",
                                 TRUE ~ "Live")) %>% 
   group_by(year, coral_condition) %>% 
   summarize(area = sum(area))
@@ -516,13 +518,13 @@ ggplot(live_dead.area, aes(x = year, y = area, fill = fct_rev(coral_condition)))
   geom_col(color = "black") +
   labs(x = "Year",
        y = Surface~area~(m^2)) +
-  scale_fill_manual(values = c("#9C899E", "#333333"),
+  scale_fill_manual(values = c("white", "#4A5352"),
                     name = "",
                     labels = c(Live~coral~(italic("Acropora + Pocillopora")), "Dead coral")) +
   scale_x_continuous(breaks = c(2017,2018,2019,2020)) +
   scale_y_continuous(expand = c(0,0),
-                     limits = c(0, 17)) +
-  theme_classic(base_size = 12) +
+                     limits = c(0, 33)) +
+  theme_classic(base_size = 14) +
   theme(legend.position = "top") 
 
 # Proportional values
@@ -658,7 +660,8 @@ live_coral_change.2017_2018/plot18_live.2018.n
 Get size classes in a way that will line up with Sankey diagram
 ```{r}
 
-sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action != "born",
@@ -668,7 +671,8 @@ sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.c
   mutate(year = 2017) %>% 
   select(genet, year, size, action)
 
-sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action != "born",
@@ -681,7 +685,8 @@ sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.c
 sizes.2018.check <- sizes.2018 %>% 
   filter(action == "born")
 
-sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2019.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>%
   clean_names() %>% 
   filter(class == "Pocillopora",
          action != "born",
@@ -691,7 +696,8 @@ sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.c
   mutate(year = 2019) %>% 
   select(genet, year, size, action)
 
-sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2020.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>%
   clean_names() %>% 
   filter(#period == "2019-2020",
          class == "Pocillopora",
@@ -736,8 +742,10 @@ ggplot(sizes.all_years, aes(x = size)) +
   facet_wrap(~year, ncol = 4) +
   labs(x = Colony~size~(cm^2),
        y = "No. live colonies") +
+  scale_x_continuous(breaks = c(50, 500, 1000)) +
+  scale_y_continuous(limits = c(0,200)) +
   scale_fill_manual(name = "",
-                    labels = c("Size increase", "", "Size decrease"),
+                    labels = c("Size increase", "Initial size", "Size decrease"),
                     values = c("#D7C8C6", "white", "#ECBD95")) +
   theme_minimal(base_size = 14)
 
@@ -763,7 +771,8 @@ ggplot(sizes.all_years, aes(x = size)) +
 #### Mortality
 ```{r}
 #dead_sizes.2017 <- tibble(year = 2017, size = 0)
-dead_sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+dead_sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
   clean_names() %>% 
   select(-area2) %>% 
   filter(class == "Pocillopora_dead", 
@@ -775,7 +784,8 @@ dead_sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2
   select(year, size)
 
 
-dead_sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
+dead_sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2018.csv") %>%
   clean_names() %>% 
   filter(class == "Pocillopora",
          area1 > 20,
@@ -785,7 +795,8 @@ dead_sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2
   mutate(year = 2018) %>% 
   select(year, size)
 
-dead_sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+dead_sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2019.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2019.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action == "dead",
@@ -795,7 +806,8 @@ dead_sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2
   mutate(year = 2019) %>% 
   select(year, size)
 
-dead_sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+dead_sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2020.csv") %>% 
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action == "dead",
@@ -812,13 +824,16 @@ dead_sizes.all_years <- rbind(dead_sizes.2017, dead_sizes.2018, dead_sizes.2019,
 ```{r}
 ggplot(dead_sizes.all_years, aes(x = size)) +
   geom_histogram(color = "black",
-                 fill = "#4A5352",
+                 #fill = "#4A5352",
                  binwidth = 100) +
   facet_wrap(~year, ncol = 4) +
   labs(x = Colony~size~(cm^2),
        y = "No. dead colonies") +
-  scale_x_continuous(breaks = c(0, 400, 800, 1200)) +
-  scale_y_continuous(limits = c(0,150)) +
+  scale_x_continuous(breaks = c(0, 500, 1000)) +
+  scale_y_continuous(limits = c(0,200)) +
+  scale_fill_manual(name = "",
+                    labels = "Completley dead",
+                    values = "#4A5352") +
   expand_limits(x = 1200) +
   theme_minimal(base_size = 14)
 ```
@@ -978,9 +993,10 @@ For Pocillopora
 ## Build individual dataframes for colony condition each year
 
 # 2017
-plot18_sankey.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+plot18_sankey.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>%
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>%
   clean_names() %>% 
-  filter(period == "2017-2018",
+  filter(#period == "2017-2018",
          class == "Pocillopora",
          area1 > 20,
          split_fuse == "none") %>% 
@@ -988,9 +1004,10 @@ plot18_sankey.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_201
   select(genet, T1)
 
 # 2018
-plot18_sankey.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+plot18_sankey.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>%
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
   clean_names() %>% 
-  filter(period == "2017-2018",
+  filter(#period == "2017-2018",
          class == "Pocillopora",
          action != "born",
          #area1 > 20,
@@ -999,15 +1016,16 @@ plot18_sankey.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_201
                             action == "grow" ~ "Live",
                             action == "same" ~ "Live",
                             action == "shrink" ~ "Partially dead"),
-         period = as.factor(period),
+         #period = as.factor(period),
          genet = as.character(genet),
          T2 = as.factor(action)) %>% 
   select(genet, T2)
 
 # 2019
-plot18_sankey.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+plot18_sankey.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2019.csv") %>%
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
   clean_names() %>% 
-  filter(period == "2019-2020",
+  filter(#period == "2019-2020",
          class == "Pocillopora",
          action != "born",
          area1 > 20,
@@ -1016,15 +1034,16 @@ plot18_sankey.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_201
                             action == "grow" ~ "Live",
                             action == "same" ~ "Live",
                             action == "shrink" ~ "Partially dead"),
-         period = as.factor(period),
+         #period = as.factor(period),
          genet = as.character(genet),
          T3 = as.factor(action)) %>% 
   select(genet, T3)
 
 # 2020
-plot18_sankey.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>% #read.csv("Data/Plot 18/Matches/Plot18_2017-2020_matches.csv") %>% 
+plot18_sankey.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2020.csv") %>%
+  #read_csv("Data/Plot 18/Plot18_even more updated/Plot18_2017-2020_even more updated.csv") %>%
   clean_names() %>% 
-  filter(period == "2019-2020",
+  filter(#period == "2019-2020",
          #class == "Pocillopora",
          action != "born",
          split_fuse == "none") %>% 
@@ -1032,7 +1051,7 @@ plot18_sankey.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Plot18_201
                             action == "grow" ~ "Live",
                             action == "same" ~ "Live",
                             action == "shrink" ~ "Partially dead"),
-         period = as.factor(period),
+         #period = as.factor(period),
          genet = as.character(genet),
          T4 = as.factor(action)) %>% 
   select(genet, T4)
@@ -1059,7 +1078,7 @@ plot_18.sankey.keiko <- plot_18.all_years %>%
   group_by(T1, T2, T3, T4) %>% 
   summarize(n = n()) %>% 
   arrange(desc(n)) %>% 
-  filter(n > 1) 
+  filter(n > 3) 
 
 # # Use knitr for a pretty table
 # html_table <- kable(plot_18.sankey.keiko, format = "html") %>% 
@@ -1085,11 +1104,12 @@ ggplot(plot_18.sankey.keiko,
        aes(axis1 = T1, axis2 = T2, axis3 = T3, axis4 = T4, y = n)) +
   geom_alluvium(color = "white",
                 fill = "black") +
-  geom_stratum(aes(fill = after_stat(stratum)), color = "black") +
+  geom_stratum(aes(fill = after_stat(stratum)), 
+               color = "black") +
   scale_fill_manual(values = c("Live" = "#D7C8C6", 
                                "Partially dead" = "#ECBD95", 
                                "Completely dead" = "#4A5352"),
-                    name = "Colony condition:") +
+                    name = "Pocillopora condition") +
   scale_x_discrete(limits = c("1", "2", "3", "4"),
                    labels = c("1" = "2017", "2" = "2018", "3" = "2019", "4" = "2020"),
                    expand = c(0.05, 0.1),
@@ -1097,7 +1117,7 @@ ggplot(plot_18.sankey.keiko,
   labs(x = "Year",
        y = "Number of colonies") +
   theme_alluvial(base_size = 14) +
-  theme(legend.position = "bottom") +
+  #theme(legend.position = "bottom") +
   guides(color = guide_legend(nrow = 1))
 
 # Reorder dataframe to match Sankey plot
