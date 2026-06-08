@@ -747,7 +747,8 @@ ggplot(sizes.all_years, aes(x = size)) +
   scale_fill_manual(name = "",
                     labels = c("Size increase", "Initial size", "Size decrease"),
                     values = c("#D7C8C6", "white", "#ECBD95")) +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 14) #+
+  #theme(legend.position = "none")
 
 # For For 2017 as one color
 ggplot(sizes.all_years, aes(x = size)) +
@@ -822,7 +823,7 @@ dead_sizes.all_years <- rbind(dead_sizes.2017, dead_sizes.2018, dead_sizes.2019,
 ```
 
 ```{r}
-ggplot(dead_sizes.all_years, aes(x = size)) +
+dead_histo <- ggplot(dead_sizes.all_years, aes(x = size)) +
   geom_histogram(color = "black",
                  #fill = "#4A5352",
                  binwidth = 100) +
