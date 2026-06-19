@@ -3,6 +3,8 @@
 library(tidyverse)
 library(janitor)
 library(DHARMa)
+library(glmmTMB)
+library(ggeffects)
 
 # Master datafile for all plots 2018-2019
 colony_matches <- read_csv("Data/Matches_master.csv") %>% 

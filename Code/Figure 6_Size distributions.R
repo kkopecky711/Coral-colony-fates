@@ -45,7 +45,7 @@ sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12
   mutate(year = 2020) %>% 
   select(genet, year, size, action)
 
-# COmbiune into a single dataframe
+# Combine into a single dataframe
 sizes.all_years <- rbind(sizes.2017, sizes.2018, sizes.2019, sizes.2020)
 sizes.all_years <- sizes.all_years %>% 
   mutate(action = case_when(action == "shrink" ~ "Shrink",
