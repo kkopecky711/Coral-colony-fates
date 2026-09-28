@@ -19,7 +19,7 @@ colony_fates <- colony_matches %>%
   mutate(action = case_when(#action == "born" ~ "Growth"
     action == "dead" ~ "Complete mortality",
     action == "grow" ~ "Growth",
-    action == "same" ~ "No change",
+    action == "same" ~ "Stasis",
     action == "shrink" ~ "Partial mortality")) %>% 
   select(-id_2019) %>% 
   group_by(plot, id_2018, class, action) %>% 
@@ -32,18 +32,19 @@ pre_dist.col_num <- colony_fates %>%
   group_by(class) %>% 
   summarize(num_colonies = n())
 
-ggplot(pre_dist.col_num, aes(x = fct_rev(class), y = num_colonies, fill = class)) +
+ggplot(pre_dist.col_num, aes(x = fct_rev(class), y = num_colonies)) +
   geom_col(width = 1,
            color = "black",
+           fill = "white",
            position = "stack") +
   scale_y_continuous(expand = c(0,0),
                      limits = c(0,3010)) +
-  scale_fill_manual(name = "",
-                    labels = c("", ""),
-                    values = c("#604A76", "#D7C8C6")) +
   labs(x = "Coral taxa",
        y = "Number of colonies") +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 12) +
+  theme(axis.text.x = element_text(
+    angle = 25,
+    hjust = 1))
 
 # Total live surface areas in 2018 (pre-disturbance)
 pre_dist.surf_area <- colony_fates %>% 
@@ -51,19 +52,27 @@ pre_dist.surf_area <- colony_fates %>%
   group_by(class) %>% 
   summarize(total_surf = sum(area_2018)*0.0001)
 
-ggplot(pre_dist.surf_area, aes(x = fct_rev(class), y = total_surf, fill = class)) +
+ggplot(pre_dist.surf_area, aes(x = fct_rev(class), y = total_surf)) +
   geom_col(width = 1,
            color = "black",
+           fill = "white",
            position = "stack") +
   scale_y_continuous(expand = c(0,0),
                      limits = c(0,71)) +
-  scale_fill_manual(name = "",
-                    labels = c("", ""),
-                    values = c("#604A76", "#D7C8C6")) +
   labs(x = "Coral taxa",
        y = Surface~area~(m^2)) +
-  theme_classic(base_size = 12)
+  theme_classic(base_size = 12) +
+  theme(axis.text.x = element_text(
+    angle = 25,
+    hjust = 1))
 
+## Colors for visualizations
+fate_colors <- c(
+  "Growth"             = "#83A552",
+  "Stasis"             = "#7ACCD7",
+  "Partial mortality"  = "#115896",
+  "Complete mortality" = "#21282F"
+)
 
 ## Pocillopora
 colony_numbers.poc <- colony_fates %>% 
@@ -72,18 +81,21 @@ colony_numbers.poc <- colony_fates %>%
   group_by(action) %>% 
   summarize(num_colonies = n())
 
-colony_numbers.poc$action <- ordered(colony_numbers.poc$action, levels = c("Complete mortality", "Partial mortality", "No change", "Growth"))
+colony_numbers.poc$action <- ordered(colony_numbers.poc$action, levels = c("Growth", "Stasis", "Partial mortality", "Complete mortality"))
 
-ggplot(colony_numbers.poc, aes(x = action, y = num_colonies)) +
+ggplot(colony_numbers.poc, aes(x = action, y = num_colonies, fill = action)) +
   geom_col(color = "black", 
-           fill = "#D7C8C6",
            width = 0.6) +
   scale_y_continuous(expand = c(0,0),
                      limits = c(0,1230),
                      breaks = c(200,400,600,800,1000,1200)) +
-  labs(x = "Type of change",
+  labs(x = "Fate category",
        y = "Number of colonies") +
-  theme_classic(base_size = 12)
+  scale_fill_manual(values = fate_colors) +
+  theme_classic(base_size = 12) +
+  theme(axis.text.x = element_text(
+    angle = 25,
+    hjust = 1))
 
 ## Acropora
 colony_numbers.acro <- colony_fates %>% 
@@ -92,18 +104,21 @@ colony_numbers.acro <- colony_fates %>%
   group_by(action) %>% 
   summarize(num_colonies = n())
 
-colony_numbers.acro$action <- ordered(colony_numbers.acro$action, levels = c("Complete mortality", "Partial mortality", "No change", "Growth"))
+colony_numbers.acro$action <- ordered(colony_numbers.acro$action, levels = c("Growth", "Stasis", "Partial mortality", "Complete mortality"))
 
-ggplot(colony_numbers.acro, aes(x = action, y = num_colonies)) +
-  geom_col(color = "black", 
-           fill = "#604A76",
+ggplot(colony_numbers.acro, aes(x = action, y = num_colonies, fill = action)) +
+  geom_col(color = "black",
            width = 0.6) +
   scale_y_continuous(expand = c(0,0),
                      limits = c(0,180),
                      breaks = c(25,50,75,100,125,150,175)) +
   labs(x = "Type of change",
        y = "Number of colonies") +
-  theme_classic(base_size = 12)
+  scale_fill_manual(values = fate_colors, guide = "none") +
+  theme_classic(base_size = 12) +
+  theme(axis.text.x = element_text(
+        angle = 25,
+        hjust = 1))
 
 
 #### Gains and losses in surface areas ----
@@ -116,17 +131,21 @@ gains_losses.poc <- colony_fates %>%
   group_by(action) %>% 
   summarize(SA_change = sum(area_change))
 
-gains_losses.poc$action <- ordered(gains_losses.poc$action, levels = c("Complete mortality", "Partial mortality", "No change", "Growth"))
+gains_losses.poc$action <- ordered(gains_losses.poc$action, levels = c("Growth", "Stasis", "Partial mortality", "Complete mortality"))
 
-ggplot(gains_losses.poc, aes(x = action, y = SA_change)) +
-  geom_col(color = "black", 
-           fill = "#D7C8C6",
+ggplot(gains_losses.poc, aes(x = action, y = SA_change, fill = action)) +
+  geom_col(color = "black",
            width = 0.6) +
   geom_hline(yintercept = 0, col = "black") +
   scale_y_continuous(limits = c(-35,10)) +
   labs(x = "Type of change",
        y = Surface~area~change~(m^2)) +
-  theme_classic(base_size = 12)
+  scale_fill_manual(values = fate_colors,
+                    guide = "none") +
+  theme_classic(base_size = 12) +
+  theme(axis.text.x = element_text(
+    angle = 25,
+    hjust = 1))
 
 ## Acropora
 gains_losses.acro <- colony_fates %>% 
@@ -136,14 +155,18 @@ gains_losses.acro <- colony_fates %>%
   group_by(action) %>% 
   summarize(SA_change = sum(area_change)) 
 
-gains_losses.acro$action <- ordered(gains_losses.acro$action, levels = c("Complete mortality", "Partial mortality", "No change", "Growth"))
+gains_losses.acro$action <- ordered(gains_losses.acro$action, levels = c("Growth", "Stasis", "Partial mortality", "Complete mortality"))
 
-ggplot(gains_losses.acro, aes(x = action, y = SA_change)) +
-  geom_col(color = "black", 
-           fill = "#604A76",
+ggplot(gains_losses.acro, aes(x = action, y = SA_change, fill = action)) +
+  geom_col(color = "black",
            width = 0.6) +
   geom_hline(yintercept = 0, col = "black") +
   labs(x = "Type of change",
        y = Surface~area~change~(m^2)) +
   scale_y_continuous(limits = c(-4,1)) +
-  theme_classic(base_size = 12)
+  scale_fill_manual(values = fate_colors,
+                    guide = "none") +
+  theme_classic(base_size = 12) +
+  theme(axis.text.x = element_text(
+    angle = 25,
+    hjust = 1))

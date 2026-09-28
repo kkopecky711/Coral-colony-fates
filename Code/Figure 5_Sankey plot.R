@@ -83,9 +83,10 @@ condition_levels <- c(
 )
 
 condition_cols <- c(
-  "Completely dead" = "#4A5352",
-  "Partially dead" = "#ECBD95",
-  "Live" = "#D7C8C6"
+  "Initial" = "white",
+  "Live"              = "#83A552",
+  "Partially dead"    = "#115896",
+  "Completely dead"   = "#21282F"
 )
 
 year_steps <- c("T1", "T2", "T3", "T4")
@@ -165,14 +166,26 @@ nodes <- path_long %>%
     ymax = ymin + n,
     ymid = (ymin + ymax) / 2
   ) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(
+    node_fill = if_else(
+      year_step == "T1",
+      "Initial",
+      as.character(condition)
+    )
+  )
 
 # Labels for each condition block
 node_labels <- nodes %>%
   mutate(
     label = n,
     label_x = x,
-    label_y = (ymin + ymax) / 2
+    label_y = (ymin + ymax) / 2,
+    text_color = if_else(
+      node_fill == "Initial",
+      "black",
+      "white"
+    )
   )
 
 # Allocate each four-year path within each node
@@ -240,7 +253,7 @@ ggplot() +
       xmax = x + bar_width / 1.5,
       ymin = ymin,
       ymax = ymax,
-      fill = condition
+      fill = node_fill
     ),
     color = "black",
     linewidth = 0.8
@@ -252,21 +265,24 @@ ggplot() +
     aes(
       x = label_x,
       y = label_y,
-      label = label
+      label = label,
+      color = text_color
     ),
     size = 4,
     fontface = "bold"
   ) +
   
+  scale_color_identity() +
+  
   scale_fill_manual(
     values = condition_cols,
-      breaks = c(
-        "Live",
-        "Partially dead",
-        "Completely dead"
-      ),
+    breaks = c(
+      "Initial",
+      "Live",
+      "Partially dead",
+      "Completely dead"
+    ),
     name = "Colony condition"
-    #name = expression(italic("Pocillopora") ~ "condition")
   ) +
   
   scale_x_continuous(

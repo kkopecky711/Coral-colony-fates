@@ -55,6 +55,7 @@ sizes.all_years <- sizes.all_years %>%
   mutate(fill_color = if_else(year == 2017, "None", action))
 
 ## Histograms of live colony size distributions in each year
+
 ggplot(sizes.all_years, aes(x = size)) +
   geom_histogram(aes(fill = fill_color),
                  color = "black",
@@ -66,9 +67,9 @@ ggplot(sizes.all_years, aes(x = size)) +
   scale_y_continuous(limits = c(0,200)) +
   scale_fill_manual(name = "",
                     labels = c("Size increase", "Initial size", "Size decrease"),
-                    values = c("#D7C8C6", "white", "#ECBD95")) +
-  theme_minimal(base_size = 14) #+
-  #theme(legend.position = "none")
+                    values = c("#83A552", "white", "#115896")) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
 
 ## Create dataframes for sizes of dead colonies in each year
 dead_sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
@@ -116,14 +117,15 @@ dead_sizes.all_years <- rbind(dead_sizes.2017, dead_sizes.2018, dead_sizes.2019,
 # Histogram of dead colonies
 ggplot(dead_sizes.all_years, aes(x = size)) +
   geom_histogram(color = "black",
+                 fill = "#21282F",
                  binwidth = 100) +
   facet_wrap(~year, ncol = 4) +
   labs(x = Colony~size~(cm^2),
        y = "No. dead colonies") +
   scale_x_continuous(breaks = c(0, 500, 1000)) +
   scale_y_continuous(limits = c(0,200)) +
-  scale_fill_manual(name = "",
-                    labels = "Dead",
-                    values = "#4A5352") +
+  # scale_fill_manual(name = "",
+  #                   labels = "Dead",
+  #                   values = "#21282F") +
   expand_limits(x = 1200) +
   theme_minimal(base_size = 14)
