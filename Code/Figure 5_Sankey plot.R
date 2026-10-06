@@ -8,7 +8,7 @@ library(gt)
 ## Create dataframes of colonies in each year
 
 # 2017
-plot18_sankey.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>%
+plot18_sankey.2017 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2018.csv") %>%
   clean_names() %>% 
   filter(class == "Pocillopora",
     area1 > 20,
@@ -17,27 +17,23 @@ plot18_sankey.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_20
   select(genet, T1)
 
 # 2018
-plot18_sankey.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>%
+plot18_sankey.2018 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2018.csv") %>%
   clean_names() %>% 
-  filter(#period == "2017-2018",
-    class == "Pocillopora",
+  filter(class == "Pocillopora",
     action != "born",
-    #area1 > 20,
     split_fuse == "none") %>% 
   mutate(action = case_when(action == "dead" ~ "Completely dead",
                             action == "grow" ~ "Live",
                             action == "same" ~ "Live",
                             action == "shrink" ~ "Partially dead"),
-         #period = as.factor(period),
          genet = as.character(genet),
          T2 = as.factor(action)) %>% 
   select(genet, T2)
 
 # 2019
-plot18_sankey.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2019.csv") %>%
+plot18_sankey.2019 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2019.csv") %>%
   clean_names() %>% 
-  filter(#period == "2019-2020",
-    class == "Pocillopora",
+  filter(class == "Pocillopora",
     action != "born",
     area1 > 20,
     split_fuse == "none") %>% 
@@ -45,23 +41,19 @@ plot18_sankey.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_20
                             action == "grow" ~ "Live",
                             action == "same" ~ "Live",
                             action == "shrink" ~ "Partially dead"),
-         #period = as.factor(period),
          genet = as.character(genet),
          T3 = as.factor(action)) %>% 
   select(genet, T3)
 
 # 2020
-plot18_sankey.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2020.csv") %>%
+plot18_sankey.2020 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2020.csv") %>%
   clean_names() %>% 
-  filter(#period == "2019-2020",
-    #class == "Pocillopora",
-    action != "born",
+  filter(action != "born",
     split_fuse == "none") %>% 
   mutate(action = case_when(action == "dead" ~ "Completely dead",
                             action == "grow" ~ "Live",
                             action == "same" ~ "Live",
                             action == "shrink" ~ "Partially dead"),
-         #period = as.factor(period),
          genet = as.character(genet),
          T4 = as.factor(action)) %>% 
   select(genet, T4)

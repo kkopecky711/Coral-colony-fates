@@ -1,7 +1,10 @@
 #### Size distributions of Pocillopora by year for single plot
 
+library(tidyverse)
+library(janitor)
+
 # Create dataframes of colony sizes for each year
-sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+sizes.2017 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2018.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action != "born",
@@ -11,7 +14,7 @@ sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12
   mutate(year = 2017) %>% 
   select(genet, year, size, action)
 
-sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+sizes.2018 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2018.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action != "born",
@@ -21,10 +24,7 @@ sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12
   mutate(year = 2018) %>% 
   select(genet, year, size, action)
 
-sizes.2018.check <- sizes.2018 %>% 
-  filter(action == "born")
-
-sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2019.csv") %>% 
+sizes.2019 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2019.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action != "born",
@@ -34,10 +34,9 @@ sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12
   mutate(year = 2019) %>% 
   select(genet, year, size, action)
 
-sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2020.csv") %>% 
+sizes.2020 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2020.csv") %>% 
   clean_names() %>% 
-  filter(#period == "2019-2020",
-    class == "Pocillopora",
+  filter(class == "Pocillopora",
     area2 > 20,
     action != "born",
     split_fuse == "none") %>% 
@@ -72,7 +71,7 @@ ggplot(sizes.all_years, aes(x = size)) +
   theme(legend.position = "none")
 
 ## Create dataframes for sizes of dead colonies in each year
-dead_sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+dead_sizes.2017 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2018.csv") %>% 
   clean_names() %>% 
   select(-area2) %>% 
   filter(class == "Pocillopora_dead", 
@@ -82,7 +81,7 @@ dead_sizes.2017 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-
   mutate(year = 2017) %>% 
   select(year, size)
 
-dead_sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2018.csv") %>% 
+dead_sizes.2018 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2018.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          area1 > 20,
@@ -92,7 +91,7 @@ dead_sizes.2018 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-
   mutate(year = 2018) %>% 
   select(year, size)
 
-dead_sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2019.csv") %>% 
+dead_sizes.2019 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2019.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action == "dead",
@@ -102,7 +101,7 @@ dead_sizes.2019 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-
   mutate(year = 2019) %>% 
   select(year, size)
 
-dead_sizes.2020 <- read_csv("Data/Plot 18/Plot18_even more updated/Updated_2025-02-12/Matches_2025-02-12_2017-2020.csv") %>% 
+dead_sizes.2020 <- read_csv("Data/Plot 18/Matches_2025-02-12_2017-2020.csv") %>% 
   clean_names() %>% 
   filter(class == "Pocillopora",
          action == "dead",
